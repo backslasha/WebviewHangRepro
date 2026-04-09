@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebView2 — High-freq prompt()</title>
+  <style>
+    body { font-family: monospace; padding: 16px; background: #111; color: #eee; }
+    #stats { font-size: 32px; font-weight: bold; color: #7cf; text-align: center; padding: 20px 0; }
+    button {
+      background: #333; color: #fff; border: 1px solid #666;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer;
+      font-family: monospace; font-size: 13px; margin-right: 8px;
+    }
+    button.running { border-color: #0f0; color: #0f0; }
+    .hint { color: #888; font-size: 13px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div id="stats">Preparing...</div>
+
+<button id="btnToggle" onclick="togglePing()">Stop</button>
+<button onclick="adjustInterval(-10)">Faster</button>
+<button onclick="adjustInterval(10)">Slower</button>
+<span id="intervalDisplay" style="color:#888;margin-left:8px;">10ms</span>
+
+<p class="hint">Press Back while counter is running to trigger the freeze.<br/>
+Shorter interval = higher repro rate. Use "Faster" if it doesn't trigger.</p>
+
+<script>
+var n = 0, running = false, interval = 10, timer = null;
+
+function tick() {
+  if (!running) return;
+  n++;
+  window.prompt('PING#' + n);
+  document.getElementById('stats').textContent = 'PING #' + n;
+  if (running) timer = setTimeout(tick, interval);
+}
+
+function start() {
+  running = true;
+  document.getElementById('btnToggle').textContent = 'Stop';
+  document.getElementById('btnToggle').className = 'running';
+  tick();
+}
+
+function stop() {
+  running = false;
+  if (timer) { clearTimeout(timer); timer = null; }
+  document.getElementById('btnToggle').textContent = 'Start';
+  document.getElementById('btnToggle').className = '';
+}
+
+function togglePing() { running ? stop() : start(); }
+
+function adjustInterval(d) {
+  interval = Math.max(1, Math.min(500, interval + d));
+  document.getElementById('intervalDisplay').textContent = interval + 'ms';
+}
+
+setTimeout(start, 1000);
+</script>
+</body>
+</html>
